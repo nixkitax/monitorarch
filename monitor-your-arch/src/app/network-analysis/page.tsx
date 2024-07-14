@@ -85,21 +85,26 @@ export default function Home() {
     const upload = validStats.map((stat) => stat.upload);
     const download = validStats.map((stat) => stat.download);
 
-    const timestamps = validStats.map((stat) => stat.timestamp * 1000);
+    const timestamps = validStats.map(
+      (stat) => new Date(stat.timestamp * 1000)
+    );
 
     const labels = timestamps.map((timestamp) => {
-      const date =
-        new Date().getHours() +
-        ":" +
-        new Date().getMinutes() +
-        ":" +
-        new Date().getSeconds();
+      const date = `${timestamp.getHours()}:${timestamp.getMinutes()}:${timestamp.getSeconds()}`;
       return date.toString();
     });
 
+    // Log raw data for debugging
+    console.log("Raw upload data:", upload);
+    console.log("Raw download data:", download);
+
     // Apply smoothing
-    const smoothedUpload = applyMovingAverage(upload, 3); // Adjust window size as needed
-    const smoothedDownload = applyMovingAverage(download, 3);
+    const smoothedUpload = applyMovingAverage(upload, 5); // Adjust window size as needed
+    const smoothedDownload = applyMovingAverage(download, 5);
+
+    // Log smoothed data for debugging
+    console.log("Smoothed upload data:", smoothedUpload);
+    console.log("Smoothed download data:", smoothedDownload);
 
     setTrafficData((prevData) => ({
       upload: [...prevData.upload, ...smoothedUpload],
@@ -111,7 +116,7 @@ export default function Home() {
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
     if (sniffing) {
-      interval = setInterval(fetchTrafficStats, 200);
+      interval = setInterval(fetchTrafficStats, 1000); // Increase the interval to 1 second
     }
     return () => {
       if (interval) clearInterval(interval);

@@ -10,14 +10,14 @@ use serde::Serialize;
 use std::sync::{Arc, Mutex, mpsc};
 use tauri::State;
 use std::collections::VecDeque;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{SystemTime, UNIX_EPOCH};
 use std::thread;
 
 #[derive(Clone, Serialize)]
 struct TrafficStats {
     upload: usize,
     download: usize,
-    timestamp: SystemTime,
+    timestamp: u64,
 }
 
 impl Default for TrafficStats {
@@ -25,7 +25,7 @@ impl Default for TrafficStats {
         TrafficStats {
             upload: 0,
             download: 0,
-            timestamp: UNIX_EPOCH,
+            timestamp: UNIX_EPOCH.elapsed().unwrap().as_secs(),
         }
     }
 }
@@ -53,24 +53,24 @@ fn start_sniffing(state: State<Arc<Mutex<bool>>>, packet_store: State<Arc<Mutex<
     thread::spawn(move || {
         let interfaces = datalink::interfaces();
         for interface in interfaces.iter() {
-            println!("Interfaccia trovata: {}", interface.name);
+            println!("Found interface: {}", interface.name);
         }
 
         let interface_name = "en0".to_string();
 
         let interface = interfaces.into_iter()
             .find(|iface| iface.name == interface_name)
-            .expect("Interfaccia Wi-Fi non trovata");
+            .expect("Wi-Fi interface not found");
 
         let config = Config::default();
         let mut channel = match datalink::channel(&interface, config) {
             Ok(Ethernet(_, rx)) => rx,
             Ok(_) => {
-                eprintln!("Canale non supportato");
+                eprintln!("Unsupported channel");
                 return;
             },
             Err(e) => {
-                eprintln!("Errore nella creazione del canale: {}", e);
+                eprintln!("Failed to create channel: {}", e);
                 return;
             },
         };
@@ -119,9 +119,9 @@ fn start_sniffing(state: State<Arc<Mutex<bool>>>, packet_store: State<Arc<Mutex<
                     }
                     store.packets.push_back(packet_info.clone());
 
-                    let now = SystemTime::now();
+                    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
                     if let Some(last_stat) = store.traffic_stats.back() {
-                        if now.duration_since(last_stat.timestamp).unwrap() >= Duration::new(1, 0) {
+                        if now > last_stat.timestamp {
                             let upload = store.packets.iter().filter(|p| p.source.starts_with("192.168")).map(|p| p.size).sum();
                             let download = store.packets.iter().filter(|p| p.destination.starts_with("192.168")).map(|p| p.size).sum();
                             store.traffic_stats.push_back(TrafficStats {
@@ -129,9 +129,6 @@ fn start_sniffing(state: State<Arc<Mutex<bool>>>, packet_store: State<Arc<Mutex<
                                 download,
                                 timestamp: now,
                             });
-                            if store.traffic_stats.len() > 60 {
-                                store.traffic_stats.pop_front();
-                            }
                         }
                     } else {
                         store.traffic_stats.push_back(TrafficStats {
@@ -146,7 +143,7 @@ fn start_sniffing(state: State<Arc<Mutex<bool>>>, packet_store: State<Arc<Mutex<
                         eprintln!("Error sending traffic stats: {}", err);
                     }
                 },
-                Err(e) => eprintln!("Errore nella ricezione del pacchetto: {}", e),
+                Err(e) => eprintln!("Failed to receive packet: {}", e),
             }
         }
     });
@@ -178,5 +175,5 @@ fn main() {
         .manage(Arc::new(Mutex::new(PacketStore::default())))
         .invoke_handler(tauri::generate_handler![start_sniffing, stop_sniffing, get_traffic_stats])
         .run(tauri::generate_context!())
-        .expect("errore durante l'esecuzione di Tauri");
+        .expect("Error running Tauri application");
 }
