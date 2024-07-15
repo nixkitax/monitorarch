@@ -1,9 +1,9 @@
+"use client";
 import { Button } from "@/components/ui/button";
 
 interface ControlPanelProps {
   sniffing: boolean;
-  handleStart: () => void;
-  handleStop: () => void;
+  handleToggleSniffing: () => void;
   handleReset: () => void;
   handleExportCSV: () => void;
   dataAvailable: boolean;
@@ -11,19 +11,15 @@ interface ControlPanelProps {
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
   sniffing,
-  handleStart,
-  handleStop,
+  handleToggleSniffing,
   handleReset,
   handleExportCSV,
   dataAvailable,
 }) => {
   return (
     <div className="flex justify-center gap-3 py-5">
-      <Button onClick={handleStart} disabled={sniffing}>
-        Start Sniffing
-      </Button>
-      <Button onClick={handleStop} disabled={!sniffing}>
-        Stop Sniffing
+      <Button onClick={handleToggleSniffing}>
+        {sniffing ? "Stop Sniffing" : "Start Sniffing"}
       </Button>
       <Button onClick={handleReset} disabled={sniffing}>
         Reset Data

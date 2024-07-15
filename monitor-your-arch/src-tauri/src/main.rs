@@ -75,6 +75,9 @@ fn start_sniffing(state: State<Arc<Mutex<bool>>>, packet_store: State<Arc<Mutex<
             },
         };
 
+        let mut current_upload = 0;
+        let mut current_download = 0;
+
         loop {
             if !*state_clone.lock().unwrap() {
                 break;
@@ -119,16 +122,25 @@ fn start_sniffing(state: State<Arc<Mutex<bool>>>, packet_store: State<Arc<Mutex<
                     }
                     store.packets.push_back(packet_info.clone());
 
+                    if packet_info.source.starts_with("192.168") {
+                        current_upload += packet_info.size * 8; // Convert bytes to bits
+                    }
+                    if packet_info.destination.starts_with("192.168") {
+                        current_download += packet_info.size * 8; // Convert bytes to bits
+                    }
+
                     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
                     if let Some(last_stat) = store.traffic_stats.back() {
                         if now > last_stat.timestamp {
-                            let upload = store.packets.iter().filter(|p| p.source.starts_with("192.168")).map(|p| p.size).sum();
-                            let download = store.packets.iter().filter(|p| p.destination.starts_with("192.168")).map(|p| p.size).sum();
                             store.traffic_stats.push_back(TrafficStats {
-                                upload,
-                                download,
+                                upload: current_upload,
+                                download: current_download,
                                 timestamp: now,
                             });
+                            println!("Upload: {} bits Download: {} bits", current_upload, current_download);
+
+                            current_upload = 0;  // Reset upload counter
+                            current_download = 0;  // Reset download counter
                         }
                     } else {
                         store.traffic_stats.push_back(TrafficStats {

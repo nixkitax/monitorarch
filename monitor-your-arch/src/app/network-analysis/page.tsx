@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   startSniffing,
   stopSniffing,
@@ -23,26 +23,26 @@ export default function Home() {
     labels: [],
   });
 
-  const handleStart = async () => {
-    handleReset(); // Clear the existing data first
-    await startSniffing();
-    setSniffing(true);
-  };
+  const handleToggleSniffing = useCallback(async () => {
+    if (sniffing) {
+      await stopSniffing();
+      setSniffing(false);
+    } else {
+      handleReset(); // Clear the existing data first
+      await startSniffing();
+      setSniffing(true);
+    }
+  }, [sniffing]);
 
-  const handleStop = async () => {
-    await stopSniffing();
-    setSniffing(false);
-  };
-
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setTrafficData({
       upload: [],
       download: [],
       labels: [],
     });
-  };
+  }, []);
 
-  const handleExportCSV = () => {
+  const handleExportCSV = useCallback(() => {
     const headers = ["Time", "Upload (bytes)", "Download (bytes)"];
     const rows = trafficData.labels.map((label, index) => [
       label,
@@ -60,23 +60,11 @@ export default function Home() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+  }, [trafficData]);
 
-  const applyMovingAverage = (data: number[], windowSize: number) => {
-    if (data.length < windowSize) {
-      return data;
-    }
-    const smoothedData = [];
-    for (let i = 0; i < data.length - windowSize + 1; i++) {
-      const window = data.slice(i, i + windowSize);
-      const average =
-        window.reduce((sum, value) => sum + value, 0) / windowSize;
-      smoothedData.push(average);
-    }
-    return smoothedData;
-  };
+  const fetchTrafficStats = useCallback(async () => {
+    if (!sniffing) return;
 
-  const fetchTrafficStats = async () => {
     const stats: TrafficStat[] = await getTrafficStats();
     const validStats = stats.filter(
       (stat) => stat.upload !== 0 || stat.download !== 0
@@ -94,41 +82,33 @@ export default function Home() {
       return date.toString();
     });
 
-    // Log raw data for debugging
     console.log("Raw upload data:", upload);
     console.log("Raw download data:", download);
 
-    // Apply smoothing
-    const smoothedUpload = applyMovingAverage(upload, 5); // Adjust window size as needed
-    const smoothedDownload = applyMovingAverage(download, 5);
+    setTrafficData({
+      upload: upload,
+      download: download,
+      labels: labels,
+    });
 
-    // Log smoothed data for debugging
-    console.log("Smoothed upload data:", smoothedUpload);
-    console.log("Smoothed download data:", smoothedDownload);
-
-    setTrafficData((prevData) => ({
-      upload: [...prevData.upload, ...smoothedUpload],
-      download: [...prevData.download, ...smoothedDownload],
-      labels: [...prevData.labels, ...labels],
-    }));
-  };
+    setTimeout(fetchTrafficStats, 1000);
+  }, [sniffing]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
     if (sniffing) {
-      interval = setInterval(fetchTrafficStats, 1000); // Increase the interval to 1 second
+      fetchTrafficStats();
     }
+
     return () => {
-      if (interval) clearInterval(interval);
+      setSniffing(false);
     };
-  }, [sniffing]);
+  }, [sniffing, fetchTrafficStats]);
 
   return (
     <div>
       <ControlPanel
         sniffing={sniffing}
-        handleStart={handleStart}
-        handleStop={handleStop}
+        handleToggleSniffing={handleToggleSniffing}
         handleReset={handleReset}
         handleExportCSV={handleExportCSV}
         dataAvailable={trafficData.labels.length > 0}
