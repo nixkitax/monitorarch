@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 
 interface ControlPanelProps {
   sniffing: boolean;
-  handleToggleSniffing: () => void;
+  handleStartSniffing: () => void;
+  handleStopSniffing: () => void;
   handleReset: () => void;
   handleExportCSV: () => void;
   dataAvailable: boolean;
@@ -11,16 +12,16 @@ interface ControlPanelProps {
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
   sniffing,
-  handleToggleSniffing,
+  handleStartSniffing,
+  handleStopSniffing,
   handleReset,
   handleExportCSV,
   dataAvailable,
 }) => {
   return (
     <div className="flex justify-center gap-3 py-5">
-      <Button onClick={handleToggleSniffing}>
-        {sniffing ? "Stop Sniffing" : "Start Sniffing"}
-      </Button>
+      <Button onClick={handleStartSniffing}>Start Sniffing</Button>
+      <Button onClick={handleStopSniffing}>Stop Sniffing</Button>
       <Button onClick={handleReset} disabled={sniffing}>
         Reset Data
       </Button>

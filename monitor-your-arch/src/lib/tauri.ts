@@ -23,3 +23,7 @@ export async function stopSniffing() {
 export async function getTrafficStats(): Promise<TrafficStat[]> {
   return await invoke("get_traffic_stats");
 }
+
+export async function getOverviewSystem(): Promise<TrafficStat[]> {
+  return await invoke("get_overview_system");
+}

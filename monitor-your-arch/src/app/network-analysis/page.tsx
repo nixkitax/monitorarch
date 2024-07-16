@@ -23,16 +23,16 @@ export default function Home() {
     labels: [],
   });
 
-  const handleToggleSniffing = useCallback(async () => {
-    if (sniffing) {
-      await stopSniffing();
-      setSniffing(false);
-    } else {
-      handleReset(); // Clear the existing data first
-      await startSniffing();
-      setSniffing(true);
-    }
-  }, [sniffing]);
+  const handleStartSniffing = useCallback(async () => {
+    handleReset(); // Clear the existing data first
+    await startSniffing();
+    setSniffing(true);
+  }, []);
+
+  const handleStopSniffing = useCallback(async () => {
+    await stopSniffing();
+    setSniffing(false);
+  }, []);
 
   const handleReset = useCallback(() => {
     setTrafficData({
@@ -105,10 +105,14 @@ export default function Home() {
   }, [sniffing, fetchTrafficStats]);
 
   return (
-    <div>
+    <div className="mx-24 ">
+      <h1 className="font-bold text-3xl ">
+        Real-time network traffic line chart
+      </h1>
       <ControlPanel
         sniffing={sniffing}
-        handleToggleSniffing={handleToggleSniffing}
+        handleStartSniffing={handleStartSniffing}
+        handleStopSniffing={handleStopSniffing}
         handleReset={handleReset}
         handleExportCSV={handleExportCSV}
         dataAvailable={trafficData.labels.length > 0}

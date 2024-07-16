@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { ThemeProvider } from "next-themes";
@@ -25,7 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased overflow-hidden",
+          "min-h-screen bg-background font-sans antialiased overflow-x-hidden",
           fontSans.variable
         )}
       >
@@ -35,11 +34,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <h1 className="flex justify-center py-5 fon">
-            <Link href="/">MonitorArch</Link>
-          </h1>
-          <Navbar />
-          {children}
+          <h1 className="flex justify-center py-5 "></h1>
+          <div className="flex flex-row">
+            <Navbar />
+            <div className=" ml-64 ">{children}</div>
+          </div>
         </ThemeProvider>
       </body>
     </html>
