@@ -10,6 +10,12 @@ export interface TrafficStat {
   timestamp: number;
 }
 
+interface ProcessInfo {
+  pid: number;
+  name: string;
+  disk_usage: number;
+}
+
 import { invoke } from "@tauri-apps/api/tauri";
 
 export async function startSniffing() {
@@ -26,4 +32,8 @@ export async function getTrafficStats(): Promise<TrafficStat[]> {
 
 export async function getOverviewSystem(): Promise<string> {
   return await invoke("get_system_info");
+}
+
+export async function getProcesses(): Promise<ProcessInfo[]> {
+  return invoke("get_processes");
 }

@@ -45,6 +45,13 @@ struct PacketInfo {
     size: usize,
 }
 
+#[derive(Serialize, Clone)]
+struct ProcessInfo {
+    pid: i32,
+    name: String,
+    disk_usage: u64,
+}
+
 #[tauri::command]
 fn start_sniffing(state: State<Arc<Mutex<bool>>>, packet_store: State<Arc<Mutex<PacketStore>>>) {
     let (tx, rx) = mpsc::channel();
@@ -203,11 +210,21 @@ fn get_system_info() -> String {
     info
 }
 
+#[tauri::command]
+fn get_processes() -> Vec<ProcessInfo> {
+    let sys = System::new_all();
+    sys.processes().iter().map(|(pid, process)| ProcessInfo {
+        pid: pid.as_u32() as i32,
+        name: process.name().to_string(),
+        disk_usage: process.disk_usage().total_written_bytes,
+    }).collect()
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Arc::new(Mutex::new(true)))
         .manage(Arc::new(Mutex::new(PacketStore::default())))
-        .invoke_handler(tauri::generate_handler![start_sniffing, stop_sniffing, get_traffic_stats, get_system_info])
+        .invoke_handler(tauri::generate_handler![start_sniffing, stop_sniffing, get_traffic_stats, get_system_info,get_processes])
         .run(tauri::generate_context!())
         .expect("Error running Tauri application");
 }

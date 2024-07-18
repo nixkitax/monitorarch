@@ -47,10 +47,14 @@ export default function Navbar() {
             <DropdownMenuLabel>System Analysis</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href="/overview-system">Overview of system</Link>
+              <Link href="/system-analysis/overview">Overview of system</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>Register network session</DropdownMenuItem>
-            <DropdownMenuItem>Import network session</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/system-analysis/processes">
+                Processes & Disk Usage
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>Others</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu>
