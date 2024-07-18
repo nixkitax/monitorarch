@@ -24,6 +24,6 @@ export async function getTrafficStats(): Promise<TrafficStat[]> {
   return await invoke("get_traffic_stats");
 }
 
-export async function getOverviewSystem(): Promise<TrafficStat[]> {
-  return await invoke("get_overview_system");
+export async function getOverviewSystem(): Promise<string> {
+  return await invoke("get_system_info");
 }

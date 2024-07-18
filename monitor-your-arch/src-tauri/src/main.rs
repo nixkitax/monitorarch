@@ -183,21 +183,31 @@ fn get_traffic_stats(packet_store: State<Arc<Mutex<PacketStore>>>) -> Vec<Traffi
 }
 
 #[tauri::command]
-fn get_overview_system() -> String {
+fn get_system_info() -> String {
     let mut sys = System::new_all();
     sys.refresh_all();
 
-    let system_name = System::name();
-    println!("System name: {:?}", system_name);
-    
-    system_name.expect("REASON")
+    let info = format!(
+        "System name: {}\nKernel version: {}\nOS version: {}\nTotal memory: {} MB\nUsed memory: {} MB\nTotal swap: {} MB\nUsed swap: {} MB\nNumber of CPUs: {}",
+        System::name().unwrap_or_default(),
+        System::kernel_version().unwrap_or_default(),
+        System::os_version().unwrap_or_default(),
+        sys.total_memory(),
+        sys.used_memory(),
+        sys.total_swap(),
+        sys.used_swap(),
+        sys.cpus().len(),
+    );
+    println!("System info retrieved: {}", info); // Log to console
+
+    info
 }
 
 fn main() {
     tauri::Builder::default()
         .manage(Arc::new(Mutex::new(true)))
         .manage(Arc::new(Mutex::new(PacketStore::default())))
-        .invoke_handler(tauri::generate_handler![start_sniffing, stop_sniffing, get_traffic_stats, get_overview_system])
+        .invoke_handler(tauri::generate_handler![start_sniffing, stop_sniffing, get_traffic_stats, get_system_info])
         .run(tauri::generate_context!())
         .expect("Error running Tauri application");
 }
