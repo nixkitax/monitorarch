@@ -30,9 +30,11 @@ export default function Navbar() {
             <DropdownMenuLabel>Network Analysis</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href="/network-analysis">Real-time chart</Link>
+              <Link href="/network-analysis/real-time-network">Real-time chart</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>Register network session</DropdownMenuItem>
+                      <DropdownMenuItem>
+                          <Link href="/network-analysis/network-interfaces">Network Interfaces</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem>Import network session</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

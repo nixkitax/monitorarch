@@ -32,7 +32,6 @@ export default function Home() {
     fetchSystemInfo();
   }, [fetchSystemInfo]);
 
-  // Parse the system info string into an object
   const parseSystemInfo = (info: string): SystemInfo => {
     const lines = info.split("\n");
     const infoObj: SystemInfo = {};

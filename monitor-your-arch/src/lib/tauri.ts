@@ -37,3 +37,7 @@ export async function getOverviewSystem(): Promise<string> {
 export async function getProcesses(): Promise<ProcessInfo[]> {
   return invoke("get_processes");
 }
+
+export async function getInterfaces(): Promise<String[]> {
+    return invoke("get_interfaces")
+}

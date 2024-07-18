@@ -12,7 +12,8 @@ use tauri::State;
 use std::collections::VecDeque;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::thread;
-use sysinfo::System;
+use sysinfo::{System, Networks};
+
 
 #[derive(Clone, Serialize)]
 struct TrafficStats {
@@ -220,11 +221,21 @@ fn get_processes() -> Vec<ProcessInfo> {
     }).collect()
 }
 
+#[tauri::command]
+fn get_interfaces() -> Vec<String> {
+    let interfaces = datalink::interfaces();
+    let interfaces_name: Vec<String> = interfaces
+        .iter()
+        .map(|interface| interface.description.clone())
+        .collect();
+    interfaces_name
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Arc::new(Mutex::new(true)))
         .manage(Arc::new(Mutex::new(PacketStore::default())))
-        .invoke_handler(tauri::generate_handler![start_sniffing, stop_sniffing, get_traffic_stats, get_system_info,get_processes])
+        .invoke_handler(tauri::generate_handler![start_sniffing, stop_sniffing, get_traffic_stats, get_system_info,get_processes, get_interfaces])
         .run(tauri::generate_context!())
         .expect("Error running Tauri application");
 }
