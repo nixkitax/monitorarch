@@ -206,7 +206,7 @@ fn get_system_info() -> String {
         sys.used_swap(),
         sys.cpus().len(),
     );
-    println!("System info retrieved: {}", info); // Log to console
+    println!("System info retrieved: {}", info);
 
     info
 }
@@ -219,6 +219,7 @@ fn get_processes() -> Vec<ProcessInfo> {
         name: process.name().to_string(),
         disk_usage: process.disk_usage().total_written_bytes,
     }).collect()
+
 }
 
 #[tauri::command]

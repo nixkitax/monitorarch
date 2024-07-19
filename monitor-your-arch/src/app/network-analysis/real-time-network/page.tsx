@@ -24,7 +24,6 @@ export default function Home() {
   });
 
   const handleStartSniffing = useCallback(async () => {
-    handleReset(); // Clear the existing data first
     await startSniffing();
     setSniffing(true);
   }, []);
@@ -33,34 +32,6 @@ export default function Home() {
     await stopSniffing();
     setSniffing(false);
   }, []);
-
-  const handleReset = useCallback(() => {
-    setTrafficData({
-      upload: [],
-      download: [],
-      labels: [],
-    });
-  }, []);
-
-  const handleExportCSV = useCallback(() => {
-    const headers = ["Time", "Upload (bytes)", "Download (bytes)"];
-    const rows = trafficData.labels.map((label, index) => [
-      label,
-      trafficData.upload[index],
-      trafficData.download[index],
-    ]);
-
-    let csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    let encodedUri = encodeURI(csvContent);
-    let link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "network_traffic_data.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, [trafficData]);
 
   const fetchTrafficStats = useCallback(async () => {
     if (!sniffing) return;
@@ -113,8 +84,6 @@ export default function Home() {
         sniffing={sniffing}
         handleStartSniffing={handleStartSniffing}
         handleStopSniffing={handleStopSniffing}
-        handleReset={handleReset}
-        handleExportCSV={handleExportCSV}
         dataAvailable={trafficData.labels.length > 0}
       />
       <TrafficChart trafficData={trafficData} />
