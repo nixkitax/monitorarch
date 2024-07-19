@@ -12,7 +12,7 @@ use tauri::State;
 use std::collections::VecDeque;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::thread;
-use sysinfo::{System, Networks};
+use sysinfo::System;
 
 
 #[derive(Clone, Serialize)]
@@ -54,22 +54,24 @@ struct ProcessInfo {
 }
 
 #[tauri::command]
-fn start_sniffing(state: State<Arc<Mutex<bool>>>, packet_store: State<Arc<Mutex<PacketStore>>>) {
+fn start_sniffing(
+    state: State<Arc<Mutex<bool>>>,
+    packet_store: State<Arc<Mutex<PacketStore>>>,
+    interface_name: String,
+) {
     let (tx, rx) = mpsc::channel();
     let state_clone = Arc::clone(&state);
     let packet_store_clone = Arc::clone(&packet_store);
-
+    println!("{}", interface_name);
     thread::spawn(move || {
         let interfaces = datalink::interfaces();
         for interface in interfaces.iter() {
-            println!("Found interface: {}", interface.name);
+            println!("Found interface: {}", interface.description);
         }
 
-        let interface_name = "en0".to_string();
-
         let interface = interfaces.into_iter()
-            .find(|iface| iface.name == interface_name)
-            .expect("Wi-Fi interface not found");
+            .find(|iface| iface.description == interface_name)
+            .expect("Specified interface not found");
 
         let config = Config::default();
         let mut channel = match datalink::channel(&interface, config) {
@@ -177,6 +179,7 @@ fn start_sniffing(state: State<Arc<Mutex<bool>>>, packet_store: State<Arc<Mutex<
         }
     });
 }
+
 
 #[tauri::command]
 fn stop_sniffing(state: State<Arc<Mutex<bool>>>) {
