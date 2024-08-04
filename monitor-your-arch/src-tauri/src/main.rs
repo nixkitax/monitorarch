@@ -59,12 +59,19 @@ fn start_sniffing(
     packet_store: State<Arc<Mutex<PacketStore>>>,
     interface_name: String,
 ) {
+    // get system info
+    let mut sys = System::new_all();
+    sys.refresh_all();
+    let os = System::name().unwrap_or_default();
+
     let (tx, rx) = mpsc::channel();
     let state_clone = Arc::clone(&state);
     let packet_store_clone = Arc::clone(&packet_store);
     println!("{}", interface_name);
     thread::spawn(move || {
         let interfaces = datalink::interfaces();
+        
+        //WINDOWS
         for interface in interfaces.iter() {
             println!("Found interface: {}", interface.description);
         }
@@ -72,6 +79,9 @@ fn start_sniffing(
         let interface = interfaces.into_iter()
             .find(|iface| iface.description == interface_name)
             .expect("Specified interface not found");
+
+
+        //UNIX
 
         let config = Config::default();
         let mut channel = match datalink::channel(&interface, config) {
@@ -227,12 +237,28 @@ fn get_processes() -> Vec<ProcessInfo> {
 
 #[tauri::command]
 fn get_interfaces() -> Vec<String> {
-    let interfaces = datalink::interfaces();
-    let interfaces_name: Vec<String> = interfaces
-        .iter()
-        .map(|interface| interface.description.clone())
-        .collect();
-    interfaces_name
+    let mut sys = System::new_all();
+    sys.refresh_all();
+    let os = System::name().unwrap_or_default();
+    if( os == "Windows") {
+        let interfaces = datalink::interfaces();
+        println!("interfaces: {:?}", interfaces);
+        let interfaces_name: Vec<String> = interfaces
+            .iter()
+            .map(|interface| interface.description.clone())
+            .collect();
+        println!("interfaces: {:?}", interfaces_name);
+        interfaces_name
+    } else {
+        let interfaces = datalink::interfaces();
+        println!("interfaces: {:?}", interfaces);
+        let interfaces_name: Vec<String> = interfaces
+            .iter()
+            .map(|interface| interface.name.clone())
+            .collect();
+        println!("interfaces: {:?}", interfaces_name);
+        interfaces_name
+    }
 }
 
 fn main() {
