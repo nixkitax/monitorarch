@@ -42,9 +42,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [
-        "Packet.lib"
-      ],
+      "resources": ["Packet.lib"],
       "shortDescription": "",
       "targets": "all",
       "windows": {
@@ -62,10 +60,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 700,
+        "height": 800,
         "resizable": false,
         "title": "MonitorArch",
-        "width": 1000
+        "width": 1050
       }
     ]
   }

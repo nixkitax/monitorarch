@@ -14,7 +14,6 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::thread;
 use sysinfo::System;
 
-
 #[derive(Clone, Serialize)]
 struct TrafficStats {
     upload: usize,
@@ -37,7 +36,7 @@ struct PacketStore {
     packets: VecDeque<PacketInfo>,
     traffic_stats: VecDeque<TrafficStats>,
 }
-
+#[derive(Debug)]
 #[derive(Serialize, Clone)]
 struct PacketInfo {
     source: String,
@@ -64,6 +63,8 @@ fn start_sniffing(
     sys.refresh_all();
     let os = System::name().unwrap_or_default();
 
+    println!("{}", os);
+
     let (tx, rx) = mpsc::channel();
     let state_clone = Arc::clone(&state);
     let packet_store_clone = Arc::clone(&packet_store);
@@ -71,17 +72,25 @@ fn start_sniffing(
     thread::spawn(move || {
         let interfaces = datalink::interfaces();
         
+        let interface = &datalink::interfaces()[0]; 
         //WINDOWS
-        for interface in interfaces.iter() {
-            println!("Found interface: {}", interface.description);
-        }
-
-        let interface = interfaces.into_iter()
-            .find(|iface| iface.description == interface_name)
-            .expect("Specified interface not found");
-
-
-        //UNIX
+        if os == "Windows" {
+            for interface in interfaces.iter() {
+                println!("Found interface: {}", interface.description);
+            }
+    
+            let interface = interfaces.into_iter()
+                .find(|iface| iface.description == interface_name)
+                .expect("Specified interface not found");
+        } else {
+            for interface in interfaces.iter() {
+                println!("Found interface: {}", interface.name);
+            }
+    
+            let interface = interfaces.into_iter()
+                .find(|iface| iface.name == interface_name)
+                .expect("Specified interface not found");
+        }         
 
         let config = Config::default();
         let mut channel = match datalink::channel(&interface, config) {
@@ -103,9 +112,10 @@ fn start_sniffing(
             if !*state_clone.lock().unwrap() {
                 break;
             }
-
+            println!("sniffing 1");
             match channel.next() {
                 Ok(packet) => {
+                    println!("{}", packet.len());
                     let ethernet_packet = EthernetPacket::new(packet).unwrap();
                     let packet_info = match ethernet_packet.get_ethertype() {
                         pnet::packet::ethernet::EtherTypes::Ipv4 => {
@@ -142,6 +152,11 @@ fn start_sniffing(
                         store.packets.pop_front();
                     }
                     store.packets.push_back(packet_info.clone());
+                    // Controlla pacchetti piccoli
+                    if packet_info.size < 100 {
+                        println!("Skipping small packet: {}", packet_info.size);
+                        continue;
+                    }
 
                     if packet_info.source.starts_with("192.168") {
                         current_upload += packet_info.size * 8; // Convert bytes to bits
@@ -152,26 +167,27 @@ fn start_sniffing(
 
                     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
                     if let Some(last_stat) = store.traffic_stats.back() {
-                        if now > last_stat.timestamp {
+                        println!("Last timestamp: {}, Current timestamp: {}", last_stat.timestamp, now);
+                        if now > last_stat.timestamp + 1 {  // Aggiorna ogni secondo
                             store.traffic_stats.push_back(TrafficStats {
                                 upload: current_upload,
                                 download: current_download,
                                 timestamp: now,
                             });
                             println!("Upload: {} bits Download: {} bits", current_upload, current_download);
-
-                            current_upload = 0;  // Reset upload counter
-                            current_download = 0;  // Reset download counter
+                            current_upload = 0;  // Resetta contatore upload
+                            current_download = 0;  // Resetta contatore download
                         }
                     } else {
+                        println!("No previous traffic stats found, starting fresh.");
                         store.traffic_stats.push_back(TrafficStats {
-                            upload: 0,
-                            download: 0,
+                            upload: current_upload,
+                            download: current_download,
                             timestamp: now,
                         });
                     }
 
-                    // Send updated stats through the channel
+                    // Invia aggiornamenti tramite il canale
                     if let Err(err) = tx.send(store.traffic_stats.clone().into_iter().collect::<Vec<TrafficStats>>()) {
                         eprintln!("Error sending traffic stats: {}", err);
                     }
@@ -189,7 +205,6 @@ fn start_sniffing(
         }
     });
 }
-
 
 #[tauri::command]
 fn stop_sniffing(state: State<Arc<Mutex<bool>>>) {
@@ -232,7 +247,6 @@ fn get_processes() -> Vec<ProcessInfo> {
         name: process.name().to_string(),
         disk_usage: process.disk_usage().total_written_bytes,
     }).collect()
-
 }
 
 #[tauri::command]
@@ -240,7 +254,7 @@ fn get_interfaces() -> Vec<String> {
     let mut sys = System::new_all();
     sys.refresh_all();
     let os = System::name().unwrap_or_default();
-    if( os == "Windows") {
+    if os == "Windows" {
         let interfaces = datalink::interfaces();
         println!("interfaces: {:?}", interfaces);
         let interfaces_name: Vec<String> = interfaces
@@ -265,7 +279,14 @@ fn main() {
     tauri::Builder::default()
         .manage(Arc::new(Mutex::new(true)))
         .manage(Arc::new(Mutex::new(PacketStore::default())))
-        .invoke_handler(tauri::generate_handler![start_sniffing, stop_sniffing, get_traffic_stats, get_system_info,get_processes, get_interfaces])
+        .invoke_handler(tauri::generate_handler![
+            start_sniffing,
+            stop_sniffing,
+            get_traffic_stats,
+            get_system_info,
+            get_processes,
+            get_interfaces,
+        ])
         .run(tauri::generate_context!())
-        .expect("Error running Tauri application");
+        .expect("error while running tauri application");
 }
