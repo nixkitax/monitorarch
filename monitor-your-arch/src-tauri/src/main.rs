@@ -58,6 +58,9 @@ fn start_sniffing(
     packet_store: State<Arc<Mutex<PacketStore>>>,
     interface_name: String,
 ) {
+    let mut sniffing = state.lock().unwrap();
+    *sniffing = true;
+
     // get system info
     let mut sys = System::new_all();
     sys.refresh_all();
