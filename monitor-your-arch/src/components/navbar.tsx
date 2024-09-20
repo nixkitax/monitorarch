@@ -23,19 +23,22 @@ export default function Navbar() {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <p className="text-left w-full text-sm font-medium ml-4 py-1.5">
-                Network Analysis
+              Network Analysis
             </p>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-                      <DropdownMenuLabel>Network Analysis</DropdownMenuLabel>
+            <DropdownMenuLabel>Network Analysis</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-                 <Link href="/network-analysis/real-time-network">Real-time chart</Link>
+              <Link href="/network-analysis/real-time-network">
+                Real-time chart
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-                <Link href="/network-analysis/network-interfaces">Network Interfaces</Link>
+              <Link href="/network-analysis/network-interfaces">
+                Network Interfaces
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>Import network session</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -56,23 +59,6 @@ export default function Navbar() {
                 Processes & Disk Usage
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>Others</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <p className="text-left w-full text-sm font-medium ml-4 py-1.5">
-              System Logs
-            </p>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>System Logs</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link href="/network-analysis">Real-time chart</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>Register network session</DropdownMenuItem>
-            <DropdownMenuItem>Import network session</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

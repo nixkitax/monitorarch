@@ -102,18 +102,17 @@ export default function Home() {
         <div className="flex-1 flex-col items-center justify-center">
           <div className="flex-1 flex-col -mx-10 -mb-5 -my-10 ">
             <div>
-              <p className="font-normal text-xl">
-                Welcome back {localStorage.getItem("userName")}
-                <p className="font-medium text-xl"></p>
+              <p className="font-medium text-2xl">
+                Welcome back, {localStorage.getItem("userName")}! 🥰
               </p>
             </div>
           </div>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col -mt-8">
           <div>
-            <p className="font-medium text-xl pb-3">
+            <p className="font-medium text-xl pb-8 -ml-10 ">
               {" "}
-              What can I do with MonitorArch?
+              What's happening here?
             </p>
           </div>
           <div className="flex justify-center">
@@ -135,11 +134,11 @@ export default function Home() {
                       <CardContent className="flex aspect-square p-6">
                         <div className="flex flex-col">
                           <span className="text-2xl font-semibold">
-                            Real-time network chart
+                            Control Your Processes
                           </span>
                           <p className="mt-6">
-                            You can check the network traffic in real time
-                            selecting your network interface! 🥰
+                            Monitor and manage your running processes in real
+                            time for better performance!
                           </p>
                         </div>
                       </CardContent>
@@ -159,7 +158,7 @@ export default function Home() {
                           </span>
                           <p className="mt-6">
                             You can check the network traffic in real time
-                            selecting your network interface! 🥰
+                            selecting your network interface!
                           </p>
                         </div>
                       </CardContent>
@@ -182,18 +181,6 @@ export default function Home() {
                             when you're chilling!
                           </p>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-                <CarouselItem
-                  key={"paolo"}
-                  className="pl-1 md:basis-1/2 lg:basis-1/3"
-                >
-                  <div className="p-1">
-                    <Card>
-                      <CardContent className="flex aspect-square items-center justify-center p-6">
-                        <span className="text-2xl font-semibold">ciao</span>
                       </CardContent>
                     </Card>
                   </div>
