@@ -71,28 +71,26 @@ fn start_sniffing(
     println!("{}", interface_name);
     thread::spawn(move || {
         let interfaces = datalink::interfaces();
-        
-        let interface = &datalink::interfaces()[0]; 
-        //WINDOWS
-        if os == "Windows" {
+
+        let interface = if os == "Windows" {
             for interface in interfaces.iter() {
                 println!("Found interface: {}", interface.description);
             }
-    
-            let interface = interfaces.into_iter()
+        
+            interfaces.into_iter()
                 .find(|iface| iface.description == interface_name)
-                .expect("Specified interface not found");
+                .expect("Specified interface not found")
         } else {
             for interface in interfaces.iter() {
                 println!("Found interface: {}", interface.name);
             }
-    
-            let interface = interfaces.into_iter()
+        
+            interfaces.into_iter()
                 .find(|iface| iface.name == interface_name)
-                .expect("Specified interface not found");
-        }         
-
-        let config = Config::default();
+                .expect("Specified interface not found")
+        };
+        
+        println!("Using interface: {}", interface.name);        let config = Config::default();
         let mut channel = match datalink::channel(&interface, config) {
             Ok(Ethernet(_, rx)) => rx,
             Ok(_) => {
