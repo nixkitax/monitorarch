@@ -72,7 +72,7 @@ export default function Home() {
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>
-              Welcome, this is MonitorArch! {`What's`} your name? 🥰
+              Welcome, this is MonitorArch! What&apos;s your name? 🥰
             </DrawerTitle>
             <DrawerDescription>
               You can take care of your architecture here!
@@ -112,7 +112,7 @@ export default function Home() {
           <div>
             <p className="font-medium text-xl pb-8 -ml-10 ">
               {" "}
-              What's happening here?
+              What&apos;s happening here?
             </p>
           </div>
           <div className="flex justify-center">
@@ -178,7 +178,7 @@ export default function Home() {
                           </span>
                           <p className="mt-6">
                             You can register network sessions to analyze them
-                            when you're chilling!
+                            when you&apos;re chilling!
                           </p>
                         </div>
                       </CardContent>
