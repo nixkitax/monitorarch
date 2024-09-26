@@ -1,5 +1,7 @@
 # MonitorArch
 
+## You can have access to all the functionalities by executing this app from terminal with sudo! 
+
 MonitorArch is a powerful application designed to help you monitor your computer's performance in real time. With features that allow you to keep track of CPU usage, memory utilization, and network activity, MonitorArch is your go-to tool for optimizing system performance.
 
 ## Features
